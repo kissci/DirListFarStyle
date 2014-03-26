@@ -4,6 +4,10 @@
 	https://github.com/kissci/DirListFarStyle/
 */
 
+
+$_SETTING['enableeditfiles'] = true;
+
+
 //define variables
 if ( ! preg_match('/^(dirlist|image|fileedit|fileview)$/', $_GET['mode'])  ) {
 	$_GET['mode'] = 'dirlist';
@@ -111,7 +115,12 @@ if($_GET['mode'] == 'image' && isset($_GET['image'])) {
 		$size = filesize($startdir.$file);
 		$sumSize += $size;
 		$modTime = filemtime($startdir.$file);
-		echo "<tr><td><a href=\"".$basedir.".far_view.php?mode=fileedit&amp;file=".$startdir."".$file."\"><img src=\"".$basedir.".far_view.php?mode=image&amp;image=".$extension."\" alt=\"".$extension."\"/></a>&nbsp;<a href=\"".$basedir.".far_view.php?mode=fileview&amp;file=".$startdir."".$file."\">".$file."</a></td><td>".format_bytes($size)."</td><td>".date("Y.m.d.", $modTime)."</td><td>".date("H:s", $modTime)."</td></tr>\n";
+		if ($_SETTING['enableeditfiles']) {
+			$fileeditorview = 'fileedit';
+		} else {
+			$fileeditorview = 'fileview';
+		}
+		echo "<tr><td><a href=\"".$basedir.".far_view.php?mode=".$fileeditorview."&amp;file=".$startdir."".$file."\"><img src=\"".$basedir.".far_view.php?mode=image&amp;image=".$extension."\" alt=\"".$extension."\"/></a>&nbsp;<a href=\"".$basedir.".far_view.php?mode=fileview&amp;file=".$startdir."".$file."\">".$file."</a></td><td>".format_bytes($size)."</td><td>".date("Y.m.d.", $modTime)."</td><td>".date("H:s", $modTime)."</td></tr>\n";
 	}
 
 	// echo sumsize
@@ -120,7 +129,7 @@ if($_GET['mode'] == 'image' && isset($_GET['image'])) {
 
 	foot(true);
 
-} else if ($_GET['mode'] == 'fileedit' && strlen($_GET['file']) > 0) {
+} else if ($_SETTING['enableeditfiles'] && $_GET['mode'] == 'fileedit' && strlen($_GET['file']) > 0) {
 	head();
 	$file = $_GET['file'];
 	// check if form has been submitted
@@ -199,11 +208,12 @@ function head ($time = false) {
 		}
 		";
 	}
+	global $startdir;
 	print <<< END
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<title>Dir List - FAR style</title>
+	<title>$startdir - DirListFarStyle</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script type="text/javascript"><!--//--><![CDATA[//><!--
@@ -355,7 +365,7 @@ END;
 }
 
 function foot ($time = false) {
-	print "<div class=\"footer\"><a href=\"http://code.google.com/p/html-dir-list-far-style/\">HTML Dir List - FAR style</a>&nbsp;&nbsp;&nbsp;&mdash;&nbsp;&nbsp;&nbsp;<a href=\"http://validator.w3.org/check?uri=referer\">valid XHTML</a></div>\n";
+	print "<div class=\"footer\"><a href=\"https://github.com/kissci/DirListFarStyle/\">DirListFarStyle</a>&nbsp;&nbsp;&nbsp;&mdash;&nbsp;&nbsp;&nbsp;<a href=\"http://validator.w3.org/check?uri=referer\">valid XHTML</a></div>\n";
 	if ($time) {
 		print "<script type=\"text/javascript\">\n	echoTime();\n</script>\n";
 	}
